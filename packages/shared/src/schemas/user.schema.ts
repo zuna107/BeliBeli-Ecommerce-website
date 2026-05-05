@@ -18,9 +18,9 @@ export const createAddressSchema = z.object({
   city: z.string().min(1),
   district: z.string().min(1),
   postal_code: z.string().regex(/^\d{5}$/),
-  address_detail: z.string().min(5).max(255),
+  detail: z.string().min(5).max(255),
   komerce_city_id: z.string().min(1),
-  is_primary: z.boolean().default(false),
+  is_default: z.boolean().default(false),
 })
 
 export const updateAddressSchema = createAddressSchema.partial()
