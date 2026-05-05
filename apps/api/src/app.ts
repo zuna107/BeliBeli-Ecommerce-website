@@ -70,7 +70,7 @@ export async function buildApp() {
   })
 
   // ─── Static Files (local uploads) ────────────────────────────────
-  const uploadsDir = path.resolve(__dirname, '../../uploads')
+  const uploadsDir = path.resolve(__dirname, '../uploads')
   await app.register(staticFiles, {
     root: uploadsDir,
     prefix: '/uploads/',
