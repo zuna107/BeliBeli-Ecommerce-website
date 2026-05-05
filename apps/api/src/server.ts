@@ -8,8 +8,10 @@ async function start() {
 
   try {
     await app.listen({ port: PORT, host: HOST })
-    console.log(`🚀 BeliBeli API running at http://localhost:${PORT}`)
-    console.log(`📄 Swagger docs: http://localhost:${PORT}/docs`)
+    app.log.info(`BeliBeli API listening at http://localhost:${PORT}`)
+    if (process.env.NODE_ENV !== 'production') {
+      app.log.info(`Swagger docs available at http://localhost:${PORT}/docs`)
+    }
   } catch (err) {
     app.log.error(err)
     process.exit(1)

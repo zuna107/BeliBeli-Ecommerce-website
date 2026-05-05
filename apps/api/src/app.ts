@@ -77,13 +77,13 @@ export async function buildApp() {
 
   // ─── Auth Middleware (JWT guard) ──────────────────────────────────
   app.addHook('onRequest', async (request, reply) => {
-    // Skip auth untuk route yang ditandai skipAuth
+    // Skip auth for routes marked skipAuth
     if ((request.routeOptions?.config as unknown as Record<string, unknown>)?.skipAuth) return
 
-    // Skip untuk method OPTIONS (CORS preflight)
+    // Skip OPTIONS (CORS preflight)
     if (request.method === 'OPTIONS') return
 
-    // Skip swagger UI di development
+    // Skip Swagger UI in development
     if (process.env.NODE_ENV !== 'production' && request.url.startsWith('/docs')) return
 
     // Skip static uploads (public files)
@@ -92,7 +92,7 @@ export async function buildApp() {
     try {
       await request.jwtVerify()
     } catch {
-      return reply.status(401).send({ error: 'Token tidak valid atau kedaluwarsa', code: 'UNAUTHORIZED' })
+      return reply.status(401).send({ error: 'Token is invalid or expired', code: 'UNAUTHORIZED' })
     }
   })
 

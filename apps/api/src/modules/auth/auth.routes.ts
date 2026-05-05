@@ -26,7 +26,7 @@ import { REFRESH_TOKEN_EXPIRY_MS } from '@beibeli/shared'
 function handleError(error: unknown, request: FastifyRequest, reply: FastifyReply) {
   if (error instanceof ZodError) {
     return reply.status(422).send({
-      error: 'Validasi gagal',
+      error: 'Validation failed',
       code: 'VALIDATION_ERROR',
       details: error.errors.map((e) => ({ field: e.path.join('.'), message: e.message })),
     })
@@ -41,7 +41,7 @@ function handleError(error: unknown, request: FastifyRequest, reply: FastifyRepl
     return reply.status(e.statusCode).send({ error: e.message, code: e.code })
   }
   request.log.error(error)
-  return reply.status(500).send({ error: 'Terjadi kesalahan server', code: 'INTERNAL_ERROR' })
+  return reply.status(500).send({ error: 'Internal server error', code: 'INTERNAL_ERROR' })
 }
 
 // ─── Cookie helper ────────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ export default async function authRoutes(app: FastifyInstance) {
       config: { skipAuth: true },
       schema: {
         tags: ['Auth'],
-        summary: 'Daftar akun baru',
+        summary: 'Create a new account',
         body: {
           type: 'object',
           required: ['name', 'email', 'password'],
@@ -136,7 +136,7 @@ export default async function authRoutes(app: FastifyInstance) {
       const refreshToken = request.cookies[REFRESH_COOKIE]
       await logoutUser(app, refreshToken)
       reply.clearCookie(REFRESH_COOKIE, { path: REFRESH_COOKIE_OPTIONS.path })
-      return reply.send({ message: 'Logout berhasil' })
+      return reply.send({ message: 'Logged out successfully' })
     },
   )
 
@@ -151,7 +151,7 @@ export default async function authRoutes(app: FastifyInstance) {
       try {
         const token = request.cookies[REFRESH_COOKIE]
         if (!token) {
-          return reply.status(401).send({ error: 'Refresh token tidak ada', code: 'NO_REFRESH_TOKEN' })
+          return reply.status(401).send({ error: 'Refresh token is missing', code: 'NO_REFRESH_TOKEN' })
         }
         const result = await refreshAccessToken(app, token)
 
@@ -171,7 +171,7 @@ export default async function authRoutes(app: FastifyInstance) {
       config: { skipAuth: true },
       schema: {
         tags: ['Auth'],
-        summary: 'Verifikasi email dengan kode OTP',
+        summary: 'Verify email with OTP code',
         body: {
           type: 'object',
           required: ['email', 'token'],
@@ -200,7 +200,7 @@ export default async function authRoutes(app: FastifyInstance) {
       config: { skipAuth: true },
       schema: {
         tags: ['Auth'],
-        summary: 'Kirim ulang kode OTP verifikasi email',
+        summary: 'Resend email verification OTP',
         body: {
           type: 'object',
           required: ['email'],
@@ -226,7 +226,7 @@ export default async function authRoutes(app: FastifyInstance) {
       config: { skipAuth: true },
       schema: {
         tags: ['Auth'],
-        summary: 'Request reset password',
+        summary: 'Request password reset',
         body: {
           type: 'object',
           required: ['email'],
@@ -252,7 +252,7 @@ export default async function authRoutes(app: FastifyInstance) {
       config: { skipAuth: true },
       schema: {
         tags: ['Auth'],
-        summary: 'Reset password dengan token',
+        summary: 'Reset password using token',
         body: {
           type: 'object',
           required: ['token', 'password'],
@@ -280,7 +280,7 @@ export default async function authRoutes(app: FastifyInstance) {
     {
       schema: {
         tags: ['Auth'],
-        summary: 'Data user yang sedang login',
+        summary: 'Get current authenticated user',
         security: [{ bearerAuth: [] }],
       },
     },
