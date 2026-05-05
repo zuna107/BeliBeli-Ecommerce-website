@@ -7,7 +7,7 @@ export const checkoutItemSchema = z.object({
 })
 
 export const createOrderSchema = z.object({
-  address_id: z.string().uuid('Alamat wajib dipilih'),
+  address_id: z.string().uuid('Shipping address is required'),
   items: z.array(checkoutItemSchema).min(1),
   // Per toko: kurir yang dipilih
   shipping: z.array(
