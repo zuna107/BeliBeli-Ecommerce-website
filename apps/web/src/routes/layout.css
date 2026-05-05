@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@theme {
+  /* BeliBeli Primary (Blibli-inspired blue) */
+  --color-primary-50: #eff8ff;
+  --color-primary-100: #dbeffe;
+  --color-primary-200: #bee3fd;
+  --color-primary-300: #90d1fb;
+  --color-primary-400: #5bb6f7;
+  --color-primary-500: #3498f3;
+  --color-primary-600: #0095da;
+  --color-primary-700: #0176bd;
+  --color-primary-800: #065f9a;
+  --color-primary-900: #0b4f7e;
+  --color-primary-950: #073352;
+
+  /* Typography */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+

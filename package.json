@@ -1,0 +1,30 @@
+{
+  "name": "beibeli",
+  "private": true,
+  "version": "0.1.0",
+  "description": "BeliBeli — Multi-seller e-commerce marketplace",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter web --filter api dev",
+    "build": "pnpm --filter @beibeli/shared build && pnpm --filter @beibeli/db build && pnpm --parallel --filter web --filter api build",
+    "typecheck": "pnpm --recursive typecheck",
+    "lint": "pnpm --recursive lint",
+    "format": "prettier --write \"**/*.{ts,svelte,json,md,yaml}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,svelte,json,md,yaml}\" --ignore-path .gitignore",
+    "db:migrate": "pnpm --filter @beibeli/db migrate",
+    "db:studio": "pnpm --filter @beibeli/db studio",
+    "db:seed": "pnpm --filter @beibeli/db seed",
+    "db:reset": "pnpm --filter @beibeli/db reset",
+    "db:generate": "pnpm --filter @beibeli/db generate",
+    "test": "pnpm --recursive test",
+    "test:e2e": "pnpm --filter web test:e2e"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "prettier-plugin-svelte": "^3.3.3",
+    "typescript": "^5.7.3"
+  }
+}
