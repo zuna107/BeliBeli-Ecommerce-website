@@ -42,7 +42,7 @@ export async function registerUser(app: FastifyInstance, input: RegisterInput) {
 
   const existing = await app.prisma.user.findUnique({ where: { email } })
   if (existing) {
-    throw serviceError(409, 'Email sudah terdaftar', 'EMAIL_TAKEN')
+    throw serviceError(409, 'Email is already registered', 'EMAIL_TAKEN')
   }
 
   const passwordHash = await bcrypt.hash(password, 12)
@@ -56,7 +56,7 @@ export async function registerUser(app: FastifyInstance, input: RegisterInput) {
 
   await sendVerificationEmail(app, user.email, user.name, user.id, otp)
 
-  return { message: 'Registrasi berhasil! Cek email untuk kode verifikasi.' }
+  return { message: 'Registration successful. Please check your email for the verification code.' }
 }
 
 export async function loginUser(app: FastifyInstance, input: LoginInput) {
@@ -64,16 +64,16 @@ export async function loginUser(app: FastifyInstance, input: LoginInput) {
 
   const user = await app.prisma.user.findUnique({ where: { email } })
   if (!user) {
-    throw serviceError(401, 'Email atau password salah', 'INVALID_CREDENTIALS')
+    throw serviceError(401, 'Invalid email or password', 'INVALID_CREDENTIALS')
   }
 
   const passwordValid = await bcrypt.compare(password, user.password_hash)
   if (!passwordValid) {
-    throw serviceError(401, 'Email atau password salah', 'INVALID_CREDENTIALS')
+    throw serviceError(401, 'Invalid email or password', 'INVALID_CREDENTIALS')
   }
 
   if (!user.email_verified) {
-    throw serviceError(403, 'Email belum diverifikasi. Cek email untuk kode OTP.', 'EMAIL_NOT_VERIFIED')
+    throw serviceError(403, 'Email is not verified. Please check your inbox for the OTP code.', 'EMAIL_NOT_VERIFIED')
   }
 
   const accessToken = app.jwt.sign(
@@ -103,12 +103,12 @@ export async function loginUser(app: FastifyInstance, input: LoginInput) {
 
 export async function refreshAccessToken(app: FastifyInstance, refreshToken: string) {
   if (!refreshToken) {
-    throw serviceError(401, 'Refresh token tidak ada', 'NO_REFRESH_TOKEN')
+    throw serviceError(401, 'Refresh token is missing', 'NO_REFRESH_TOKEN')
   }
 
   const stored = await app.redis.get(`refresh:${refreshToken}`)
   if (!stored) {
-    throw serviceError(401, 'Refresh token tidak valid atau kedaluwarsa', 'INVALID_REFRESH_TOKEN')
+    throw serviceError(401, 'Refresh token is invalid or expired', 'INVALID_REFRESH_TOKEN')
   }
 
   const payload = JSON.parse(stored) as { userId: string; email: string; role: string }
@@ -141,16 +141,16 @@ export async function verifyEmail(app: FastifyInstance, input: VerifyEmailInput)
 
   const user = await app.prisma.user.findUnique({ where: { email } })
   if (!user) {
-    throw serviceError(400, 'Kode OTP tidak valid', 'INVALID_OTP')
+    throw serviceError(400, 'Invalid OTP code', 'INVALID_OTP')
   }
 
   if (user.email_verified) {
-    throw serviceError(400, 'Email sudah diverifikasi', 'ALREADY_VERIFIED')
+    throw serviceError(400, 'Email is already verified', 'ALREADY_VERIFIED')
   }
 
   const stored = await app.redis.get(`email_verify:${user.id}`)
   if (!stored || stored !== token) {
-    throw serviceError(400, 'Kode OTP tidak valid atau kedaluwarsa', 'INVALID_OTP')
+    throw serviceError(400, 'OTP code is invalid or expired', 'INVALID_OTP')
   }
 
   await app.prisma.user.update({
@@ -160,7 +160,7 @@ export async function verifyEmail(app: FastifyInstance, input: VerifyEmailInput)
 
   await app.redis.del(`email_verify:${user.id}`)
 
-  return { message: 'Email berhasil diverifikasi! Silakan login.' }
+  return { message: 'Email verified successfully. You can now log in.' }
 }
 
 export async function resendVerification(app: FastifyInstance, email: string) {
@@ -169,23 +169,23 @@ export async function resendVerification(app: FastifyInstance, email: string) {
   // Don't reveal if email exists
   if (!user || user.email_verified) {
     if (user?.email_verified) {
-      throw serviceError(400, 'Email sudah diverifikasi', 'ALREADY_VERIFIED')
+      throw serviceError(400, 'Email is already verified', 'ALREADY_VERIFIED')
     }
-    return { message: 'Jika email terdaftar, kode verifikasi akan dikirim' }
+    return { message: 'If the email is registered, a verification code will be sent' }
   }
 
   // Check cooldown: OTP exists and TTL is still > (OTP_EXPIRY - COOLDOWN)
   const ttl = await app.redis.ttl(`email_verify:${user.id}`)
   const minTtlToResend = OTP_EXPIRY_MINUTES * 60 - OTP_RESEND_COOLDOWN_SECONDS
   if (ttl > minTtlToResend) {
-    throw serviceError(429, `Tunggu ${OTP_RESEND_COOLDOWN_SECONDS} detik sebelum mengirim ulang`, 'RESEND_COOLDOWN')
+    throw serviceError(429, `Please wait ${OTP_RESEND_COOLDOWN_SECONDS} seconds before requesting another code`, 'RESEND_COOLDOWN')
   }
 
   const otp = generateOtp()
   await app.redis.setex(`email_verify:${user.id}`, OTP_EXPIRY_MINUTES * 60, otp)
   await sendVerificationEmail(app, user.email, user.name, user.id, otp)
 
-  return { message: 'Jika email terdaftar, kode verifikasi akan dikirim' }
+  return { message: 'If the email is registered, a verification code will be sent' }
 }
 
 export async function forgotPassword(app: FastifyInstance, input: ForgotPasswordInput) {
@@ -193,7 +193,7 @@ export async function forgotPassword(app: FastifyInstance, input: ForgotPassword
 
   // Don't reveal if email exists
   if (!user || !user.email_verified) {
-    return { message: 'Jika email terdaftar, link reset password akan dikirim' }
+    return { message: 'If the email is registered, a password reset link will be sent' }
   }
 
   const token = generateToken()
@@ -201,7 +201,7 @@ export async function forgotPassword(app: FastifyInstance, input: ForgotPassword
 
   await sendPasswordResetEmail(app, user.email, user.name, token)
 
-  return { message: 'Jika email terdaftar, link reset password akan dikirim' }
+  return { message: 'If the email is registered, a password reset link will be sent' }
 }
 
 export async function resetPassword(app: FastifyInstance, input: ResetPasswordInput) {
@@ -209,7 +209,7 @@ export async function resetPassword(app: FastifyInstance, input: ResetPasswordIn
 
   const userId = await app.redis.get(`pwd_reset:${token}`)
   if (!userId) {
-    throw serviceError(400, 'Token tidak valid atau kedaluwarsa', 'INVALID_TOKEN')
+    throw serviceError(400, 'Token is invalid or expired', 'INVALID_TOKEN')
   }
 
   const passwordHash = await bcrypt.hash(password, 12)
@@ -220,7 +220,7 @@ export async function resetPassword(app: FastifyInstance, input: ResetPasswordIn
 
   await app.redis.del(`pwd_reset:${token}`)
 
-  return { message: 'Password berhasil diubah! Silakan login dengan password baru.' }
+  return { message: 'Password updated successfully. You can now log in with your new password.' }
 }
 
 export async function getMe(app: FastifyInstance, userId: string) {
@@ -251,7 +251,7 @@ export async function getMe(app: FastifyInstance, userId: string) {
   })
 
   if (!user) {
-    throw serviceError(404, 'User tidak ditemukan', 'USER_NOT_FOUND')
+    throw serviceError(404, 'User not found', 'USER_NOT_FOUND')
   }
 
   return user
@@ -269,14 +269,14 @@ async function sendVerificationEmail(
   await app.mailer.sendMail({
     from: '"BeliBeli" <noreply@beibeli.com>',
     to: email,
-    subject: 'Verifikasi Email BeliBeli',
+    subject: 'Verify your BeliBeli email',
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #0095DA;">Halo, ${name}!</h2>
-        <p>Gunakan kode OTP berikut untuk verifikasi email kamu:</p>
+        <h2 style="color: #0095DA;">Hi, ${name}!</h2>
+        <p>Use the OTP code below to verify your email address:</p>
         <div style="font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #0095DA; padding: 16px 0;">${otp}</div>
-        <p style="color: #666;">Kode berlaku selama <strong>${OTP_EXPIRY_MINUTES} menit</strong>.</p>
-        <p style="color: #999; font-size: 12px;">Jika kamu tidak mendaftar di BeliBeli, abaikan email ini.</p>
+        <p style="color: #666;">This code expires in <strong>${OTP_EXPIRY_MINUTES} minutes</strong>.</p>
+        <p style="color: #999; font-size: 12px;">If you did not register at BeliBeli, you can safely ignore this email.</p>
       </div>
     `,
   })
@@ -294,14 +294,14 @@ async function sendPasswordResetEmail(
   await app.mailer.sendMail({
     from: '"BeliBeli" <noreply@beibeli.com>',
     to: email,
-    subject: 'Reset Password BeliBeli',
+    subject: 'Reset your BeliBeli password',
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #0095DA;">Halo, ${name}!</h2>
-        <p>Klik tombol berikut untuk reset password kamu:</p>
+        <h2 style="color: #0095DA;">Hi, ${name}!</h2>
+        <p>Click the button below to reset your password:</p>
         <a href="${resetUrl}" style="display:inline-block; background:#0095DA; color:#fff; padding:12px 28px; border-radius:4px; text-decoration:none; font-weight:bold;">Reset Password</a>
-        <p style="color: #666; margin-top: 16px;">Link berlaku selama <strong>${OTP_EXPIRY_MINUTES} menit</strong>.</p>
-        <p style="color: #999; font-size: 12px;">Jika kamu tidak meminta reset password, abaikan email ini.</p>
+        <p style="color: #666; margin-top: 16px;">This link expires in <strong>${OTP_EXPIRY_MINUTES} minutes</strong>.</p>
+        <p style="color: #999; font-size: 12px;">If you did not request a password reset, you can safely ignore this email.</p>
       </div>
     `,
   })

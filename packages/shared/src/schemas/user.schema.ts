@@ -4,7 +4,7 @@ export const updateProfileSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   phone: z
     .string()
-    .regex(/^(\+62|62|0)8[1-9][0-9]{6,10}$/, 'Nomor HP tidak valid')
+    .regex(/^(\+62|62|0)8[1-9][0-9]{6,10}$/, 'Invalid phone number format')
     .optional(),
   birth_date: z.string().date().optional(),
   gender: z.enum(['male', 'female', 'other']).optional(),
