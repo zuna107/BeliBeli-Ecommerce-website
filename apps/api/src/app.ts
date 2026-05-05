@@ -12,6 +12,7 @@ import prismaPlugin from './plugins/prisma'
 import redisPlugin from './plugins/redis'
 import mailerPlugin from './plugins/mailer'
 import authRoutes from './modules/auth/auth.routes'
+import userRoutes from './modules/users/user.routes'
 
 export async function buildApp() {
   const loggerConfig =
@@ -103,6 +104,7 @@ export async function buildApp() {
 
   // ─── Routes ───────────────────────────────────────────────────────
   await app.register(authRoutes, { prefix: '/api/v1/auth' })
+  await app.register(userRoutes, { prefix: '/api/v1/users' })
 
   return app
 }
