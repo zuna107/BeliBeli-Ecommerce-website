@@ -13,6 +13,10 @@ import redisPlugin from './plugins/redis'
 import mailerPlugin from './plugins/mailer'
 import authRoutes from './modules/auth/auth.routes'
 import userRoutes from './modules/users/user.routes'
+import { shopRoutes } from './modules/shops/shop.routes'
+import { categoryRoutes } from './modules/categories/category.routes'
+import { productRoutes } from './modules/products/product.routes'
+import { uploadRoutes } from './modules/upload/upload.routes'
 
 export async function buildApp() {
   const loggerConfig =
@@ -105,6 +109,10 @@ export async function buildApp() {
   // ─── Routes ───────────────────────────────────────────────────────
   await app.register(authRoutes, { prefix: '/api/v1/auth' })
   await app.register(userRoutes, { prefix: '/api/v1/users' })
+  await app.register(categoryRoutes, { prefix: '/api/v1/categories' })
+  await app.register(shopRoutes, { prefix: '/api/v1/shops' })
+  await app.register(productRoutes, { prefix: '/api/v1/products' })
+  await app.register(uploadRoutes, { prefix: '/api/v1/upload' })
 
   return app
 }

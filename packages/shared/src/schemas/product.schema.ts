@@ -1,22 +1,22 @@
 import { z } from 'zod'
 
 export const productVariantSchema = z.object({
-  name: z.string().min(1),
-  price: z.number().int().min(0),
-  stock: z.number().int().min(0),
+  name: z.string().min(1, 'Variant name is required'),
+  price: z.number().int().min(0, 'Price must be 0 or greater'),
+  stock: z.number().int().min(0, 'Stock must be 0 or greater'),
   sku: z.string().optional(),
-  weight_gram: z.number().int().min(1),
+  weight_gram: z.number().int().min(1, 'Weight must be at least 1 gram'),
 })
 
 export const createProductSchema = z.object({
-  name: z.string().min(3, 'Nama produk minimal 3 karakter').max(255),
-  description: z.string().min(10, 'Deskripsi minimal 10 karakter'),
-  category_id: z.string().uuid(),
+  name: z.string().min(3, 'Product name must be at least 3 characters').max(255),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
+  category_id: z.string().uuid('Invalid category'),
   condition: z.enum(['new', 'used']),
-  weight_gram: z.number().int().min(1, 'Berat wajib diisi'),
+  weight_gram: z.number().int().min(1, 'Weight is required'),
   min_order: z.number().int().min(1).default(1),
-  variants: z.array(productVariantSchema).min(1, 'Minimal 1 varian'),
-  image_ids: z.array(z.string().uuid()).min(1, 'Minimal 1 foto produk').max(5),
+  variants: z.array(productVariantSchema).min(1, 'At least one variant is required'),
+  image_urls: z.array(z.string().url()).min(1, 'At least one product image is required').max(5),
 })
 
 export const updateProductSchema = createProductSchema.partial()
