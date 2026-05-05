@@ -15,8 +15,12 @@ import authRoutes from './modules/auth/auth.routes'
 import userRoutes from './modules/users/user.routes'
 import { shopRoutes } from './modules/shops/shop.routes'
 import { categoryRoutes } from './modules/categories/category.routes'
+import { adminCategoryRoutes } from './modules/categories/admin-category.routes'
 import { productRoutes } from './modules/products/product.routes'
 import { uploadRoutes } from './modules/upload/upload.routes'
+import { cartRoutes } from './modules/cart/cart.routes'
+import { orderRoutes } from './modules/orders/order.routes'
+import { sellerOrderRoutes } from './modules/orders/seller-order.routes'
 
 export async function buildApp() {
   const loggerConfig =
@@ -110,9 +114,13 @@ export async function buildApp() {
   await app.register(authRoutes, { prefix: '/api/v1/auth' })
   await app.register(userRoutes, { prefix: '/api/v1/users' })
   await app.register(categoryRoutes, { prefix: '/api/v1/categories' })
+  await app.register(adminCategoryRoutes, { prefix: '/api/v1/admin/categories' })
   await app.register(shopRoutes, { prefix: '/api/v1/shops' })
   await app.register(productRoutes, { prefix: '/api/v1/products' })
   await app.register(uploadRoutes, { prefix: '/api/v1/upload' })
+  await app.register(cartRoutes, { prefix: '/api/v1/cart' })
+  await app.register(orderRoutes, { prefix: '/api/v1/orders' })
+  await app.register(sellerOrderRoutes, { prefix: '/api/v1/seller/orders' })
 
   return app
 }
