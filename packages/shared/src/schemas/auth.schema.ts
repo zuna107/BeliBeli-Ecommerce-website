@@ -20,7 +20,12 @@ export const loginSchema = z.object({
 })
 
 export const verifyEmailSchema = z.object({
-  token: z.string().min(1),
+  email: z.string().email('Email tidak valid'),
+  token: z.string().length(6, 'Kode OTP harus 6 digit'),
+})
+
+export const resendVerificationSchema = z.object({
+  email: z.string().email('Email tidak valid'),
 })
 
 export const forgotPasswordSchema = z.object({
@@ -38,5 +43,7 @@ export const resetPasswordSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>
+export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>

@@ -8,20 +8,18 @@ import staticFiles from '@fastify/static'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+import prismaPlugin from './plugins/prisma'
+import redisPlugin from './plugins/redis'
+import mailerPlugin from './plugins/mailer'
+import authRoutes from './modules/auth/auth.routes'
 
 export async function buildApp() {
-  const app = Fastify({
-    logger: {
-      level: process.env.NODE_ENV === 'production' ? 'warn' : 'info',
-      transport:
-        process.env.NODE_ENV !== 'production'
-          ? { target: 'pino-pretty', options: { colorize: true } }
-          : undefined,
-    },
-  })
+  const loggerConfig =
+    process.env.NODE_ENV !== 'production'
+      ? { level: 'info' as const, transport: { target: 'pino-pretty', options: { colorize: true } } }
+      : { level: 'warn' as const }
+
+  const app = Fastify({ logger: loggerConfig })
 
   // ─── Swagger (development only) ───────────────────────────────────
   if (process.env.NODE_ENV !== 'production') {
@@ -70,7 +68,7 @@ export async function buildApp() {
   })
 
   // ─── Static Files (local uploads) ────────────────────────────────
-  const uploadsDir = path.resolve(__dirname, '../uploads')
+  const uploadsDir = path.resolve(process.cwd(), 'uploads')
   await app.register(staticFiles, {
     root: uploadsDir,
     prefix: '/uploads/',
@@ -80,10 +78,16 @@ export async function buildApp() {
   // ─── Auth Middleware (JWT guard) ──────────────────────────────────
   app.addHook('onRequest', async (request, reply) => {
     // Skip auth untuk route yang ditandai skipAuth
-    if ((request.routeOptions?.config as Record<string, unknown>)?.skipAuth) return
+    if ((request.routeOptions?.config as unknown as Record<string, unknown>)?.skipAuth) return
 
     // Skip untuk method OPTIONS (CORS preflight)
     if (request.method === 'OPTIONS') return
+
+    // Skip swagger UI di development
+    if (process.env.NODE_ENV !== 'production' && request.url.startsWith('/docs')) return
+
+    // Skip static uploads (public files)
+    if (request.url.startsWith('/uploads/')) return
 
     try {
       await request.jwtVerify()
@@ -92,9 +96,13 @@ export async function buildApp() {
     }
   })
 
-  // ─── Register Routes ─────────────────────────────────────────────
-  // Routes akan di-register per module
-  // Contoh: app.register(import('./modules/auth/auth.routes'), { prefix: '/auth' })
+  // ─── Infrastructure Plugins ───────────────────────────────────────
+  await app.register(prismaPlugin)
+  await app.register(redisPlugin)
+  await app.register(mailerPlugin)
+
+  // ─── Routes ───────────────────────────────────────────────────────
+  await app.register(authRoutes, { prefix: '/api/v1/auth' })
 
   return app
 }
