@@ -45,7 +45,7 @@ async function main() {
     create: {
       name: 'Admin BeliBeli',
       email: 'admin@beibeli.local',
-      password_hash: '$2b$10$placeholder_run_bcrypt_first',
+      password_hash: '$2b$10$ZpHNUDv2ucFZ2n9GDJXGQuolSONbmSS5vOCfOnbli5CxuLNqiixri', // Dev123!
       role: 'admin',
       email_verified: true,
     },
@@ -60,7 +60,7 @@ async function main() {
     create: {
       name: 'Toko Demo Seller',
       email: 'seller@beibeli.local',
-      password_hash: '$2b$10$placeholder_run_bcrypt_first',
+      password_hash: '$2b$10$ZpHNUDv2ucFZ2n9GDJXGQuolSONbmSS5vOCfOnbli5CxuLNqiixri', // Dev123!
       role: 'seller',
       email_verified: true,
     },
@@ -88,15 +88,13 @@ async function main() {
     create: {
       name: 'Buyer Demo',
       email: 'buyer@beibeli.local',
-      password_hash: '$2b$10$placeholder_run_bcrypt_first',
+      password_hash: '$2b$10$ZpHNUDv2ucFZ2n9GDJXGQuolSONbmSS5vOCfOnbli5CxuLNqiixri', // Dev123!
       role: 'buyer',
       email_verified: true,
     },
   })
 
   console.log(`✅ Demo buyer: ${buyerUser.email}`)
-  console.log('\n⚠️  PENTING: Update password_hash dengan hash bcrypt yang valid sebelum testing login!')
-  console.log('   node -e "import(\'bcrypt\').then(b => b.default.hash(\'Dev123!\', 10).then(console.log))"')
   console.log('\n🎉 Seeding selesai!')
 }
 
